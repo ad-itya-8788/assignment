@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { getOwnerDash, changePwd, createOwnerStore } from '../api';
 import './owner.css';
 
@@ -13,11 +13,7 @@ const OwnerDash = ({ onLogout }) => {
   const [msg, setMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (tab === 'dash') loadDash();
-  }, [tab]);
-
-  const loadDash = async () => {
+  const loadDash = useCallback(async () => {
     setLoading(true);
     setMsg('');
     try {
@@ -37,7 +33,11 @@ const OwnerDash = ({ onLogout }) => {
         setMsg(err.response?.data?.msg || 'Error loading dashboard');
       }
     }
-  };
+  }, [onLogout]);
+
+  useEffect(() => {
+    if (tab === 'dash') loadDash();
+  }, [tab, loadDash]);
 
   const handleCreateStore = async (e) => {
     e.preventDefault();
@@ -137,23 +137,23 @@ const OwnerDash = ({ onLogout }) => {
           <div className="pwd-form">
             <h2>Create Store</h2>
             <form onSubmit={handleCreateStore}>
-              <input 
-                type="text" 
-                placeholder="Store Name (min 3 chars)" 
+              <input
+                type="text"
+                placeholder="Store Name (min 3 chars)"
                 value={storeName}
                 onChange={(e) => setStoreName(e.target.value)}
                 minLength="3"
                 required
               />
-              <input 
-                type="email" 
-                placeholder="Store Email" 
+              <input
+                type="email"
+                placeholder="Store Email"
                 value={storeEmail}
                 onChange={(e) => setStoreEmail(e.target.value)}
                 required
               />
-              <textarea 
-                placeholder="Store Address (max 400 chars)" 
+              <textarea
+                placeholder="Store Address (max 400 chars)"
                 value={storeAddr}
                 onChange={(e) => setStoreAddr(e.target.value)}
                 maxLength="400"
@@ -168,16 +168,16 @@ const OwnerDash = ({ onLogout }) => {
           <div className="pwd-form">
             <h2>Change Password</h2>
             <form onSubmit={handlePwdChange}>
-              <input 
-                type="password" 
-                placeholder="Old Password" 
+              <input
+                type="password"
+                placeholder="Old Password"
                 value={oldPwd}
                 onChange={(e) => setOldPwd(e.target.value)}
                 required
               />
-              <input 
-                type="password" 
-                placeholder="New Password (8-16 chars, 1 uppercase, 1 special)" 
+              <input
+                type="password"
+                placeholder="New Password (8-16 chars, 1 uppercase, 1 special)"
                 value={newPwd}
                 onChange={(e) => setNewPwd(e.target.value)}
                 required

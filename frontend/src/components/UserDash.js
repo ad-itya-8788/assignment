@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { getUserStores, rateStore, changePwd } from '../api';
 import './user.css';
 
@@ -7,25 +7,23 @@ const UserDash = ({ onLogout }) => {
   const [stores, setStores] = useState([]);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
-  const [total, setTotal] = useState(0);
   const [oldPwd, setOldPwd] = useState('');
   const [newPwd, setNewPwd] = useState('');
   const [msg, setMsg] = useState('');
 
-  useEffect(() => {
-    if (tab === 'stores') loadStores();
-  }, [tab, page, search]);
-
-  const loadStores = async () => {
+  const loadStores = useCallback(async () => {
     try {
       const res = await getUserStores(page, search, search);
       setStores(res.data.stores || []);
-      setTotal(res.data.total || 0);
     } catch (err) {
       console.error(err);
       setStores([]);
     }
-  };
+  }, [page, search]);
+
+  useEffect(() => {
+    if (tab === 'stores') loadStores();
+  }, [tab, loadStores]);
 
   const handleRate = async (sid, rating) => {
     try {
@@ -66,9 +64,9 @@ const UserDash = ({ onLogout }) => {
           <div>
             <h2>All Stores</h2>
             <div className="search-bar">
-              <input 
-                type="text" 
-                placeholder="🔍 Search by store name or address..." 
+              <input
+                type="text"
+                placeholder="🔍 Search by store name or address..."
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
@@ -89,8 +87,8 @@ const UserDash = ({ onLogout }) => {
                       <span>Rate this store:</span>
                       <div className="rating-buttons">
                         {[1, 2, 3, 4, 5].map(r => (
-                          <button 
-                            key={r} 
+                          <button
+                            key={r}
                             onClick={() => handleRate(s.id, r)}
                             className={s.userRating === r ? 'active' : ''}
                             title={`Rate ${r} stars`}
@@ -116,16 +114,16 @@ const UserDash = ({ onLogout }) => {
           <div className="pwd-form">
             <h2>Change Password</h2>
             <form onSubmit={handlePwdChange}>
-              <input 
-                type="password" 
-                placeholder="Old Password" 
+              <input
+                type="password"
+                placeholder="Old Password"
                 value={oldPwd}
                 onChange={(e) => setOldPwd(e.target.value)}
                 required
               />
-              <input 
-                type="password" 
-                placeholder="New Password" 
+              <input
+                type="password"
+                placeholder="New Password"
                 value={newPwd}
                 onChange={(e) => setNewPwd(e.target.value)}
                 required

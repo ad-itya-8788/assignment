@@ -6,53 +6,54 @@ const pool = require('../dbconnect');
 const router = express.Router();
 
 // Check if user has valid token
-const auth = (req, res, next) => 
-  {
+const auth = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ msg: 'No token' });
   
-  try 
-  {
-    const data = jwt.verify(token, process.env.JWT_SECRET);
+  try {
+    const data = jwt.verify(token, process.env.JWT_SECRET || 'secret123');
     req.userId = data.userId;
     req.userRole = data.userRole;
     next();
-  } 
-  catch (err) 
-  {
+  } catch (err) {
     res.status(401).json({ msg: 'Bad token' });
   }
 };
 
 // Register new user
-router.post('/register', async (req, res) => {
+router.post('/register', async (req, res) => 
+  {
   const { name, email, pwd, addr } = req.body;
   
   // Validate input
-  if (!name || name.length < 20 || name.length > 60) {
+  if (!name || name.length < 20 || name.length > 60) 
+  {
     return res.status(400).json({ msg: 'Name must be 20-60 chars' });
   }
-  if (!email || !email.includes('@')) {
+  if (!email || !email.includes('@')) 
+  {
     return res.status(400).json({ msg: 'Invalid email' });
   }
-  if (!pwd || pwd.length < 8 || pwd.length > 16) {
+  if (!pwd || pwd.length < 8 || pwd.length > 16) 
+  {    
     return res.status(400).json({ msg: 'Password must be 8-16 chars' });
   }
-  if (!/[A-Z]/.test(pwd)) {
+  if (!/[A-Z]/.test(pwd)) 
+  {
     return res.status(400).json({ msg: 'Need 1 uppercase letter' });
   }
-  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd)) {
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd)) 
+  {
     return res.status(400).json({ msg: 'Need 1 special character' });
   }
 
   try {
-    // Check if email already exists
     const check = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    if (check.rows.length > 0) {
+    if (check.rows.length > 0) 
+    {
       return res.status(409).json({ msg: 'Email already exists' });
     }
 
-    // Create new user
     const hash = await bcrypt.hash(pwd, 10);
     const result = await pool.query(
       'INSERT INTO users (name, email, password, address, role) VALUES ($1, $2, $3, $4, $5) RETURNING id, name, email, role',

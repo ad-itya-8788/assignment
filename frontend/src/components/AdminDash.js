@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { getDash, getUsers, addUser, delUser, getStores, addStore, delStore, getOwners } from '../api';
 import './admin.css';
 
@@ -8,7 +8,7 @@ const AdminDash = ({ onLogout }) => {
   const [users, setUsers] = useState([]);
   const [stores, setStores] = useState([]);
   const [owners, setOwners] = useState([]);
-  const [page, setPage] = useState(1);
+  const [page] = useState(1);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [pwd, setPwd] = useState('');
@@ -21,48 +21,48 @@ const AdminDash = ({ onLogout }) => {
   const [msg, setMsg] = useState('');
   const [err, setErr] = useState('');
 
-  useEffect(() => {
-    if (tab === 'dash') loadDash();
-    else if (tab === 'users') loadUsers();
-    else if (tab === 'stores') loadStores();
-    else if (tab === 'addStore') loadOwners();
-  }, [tab, page]);
-
-  const loadDash = async () => {
+  const loadDash = useCallback(async () => {
     try {
       const res = await getDash();
       setData(res.data);
     } catch (err) {
       console.error(err);
     }
-  };
+  }, []);
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     try {
       const res = await getUsers(page);
       setUsers(res.data.users);
     } catch (err) {
       console.error(err);
     }
-  };
+  }, [page]);
 
-  const loadStores = async () => {
+  const loadStores = useCallback(async () => {
     try {
       const res = await getStores(page);
       setStores(res.data.stores);
     } catch (err) {
       console.error(err);
     }
-  };
+  }, [page]);
 
-  const loadOwners = async () => {
+  const loadOwners = useCallback(async () => {
     try {
       const res = await getOwners();
       setOwners(res.data.owners);
     } catch (err) {
       console.error(err);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (tab === 'dash') loadDash();
+    else if (tab === 'users') loadUsers();
+    else if (tab === 'stores') loadStores();
+    else if (tab === 'addStore') loadOwners();
+  }, [tab, page, loadDash, loadUsers, loadStores, loadOwners]);
 
   const handleDelUser = async (id) => {
     if (!window.confirm('Delete user?')) return;
