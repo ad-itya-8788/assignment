@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api'
+  baseURL: 'https://assignment-k2f4.onrender.com/api' || 'http://localhost:5000/api'
 });
 
 API.interceptors.request.use(
